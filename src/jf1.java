@@ -34,10 +34,7 @@ public class jf1{
     private static void jf1(){
         initComponents();
         jf1.setVisible(true);
-
-        button3.setMnemonic(KeyEvent.VK_ENTER);
-        button2.setMnemonic(KeyEvent.VK_ENTER);
-
+        
 //      管理员登录
         button3.addActionListener(new ActionListener() {
             @Override
@@ -46,6 +43,86 @@ public class jf1{
                 jf2.setVisible(true);
             }
         });
+//       首页登录 密码框
+        checkBox1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (checkBox1.isSelected()) {
+                    //如果选中，显示密码
+                    passwordField5.setEchoChar((char)0);
+                } else {
+                    //否则隐藏密码
+                    passwordField5.setEchoChar('\u2022');
+                }
+            }
+        });
+//        管理员登录密码框
+        checkBox2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (checkBox2.isSelected()) {
+                    //如果选中，显示密码
+                    passwordField4.setEchoChar((char)0);
+                } else {
+                    //否则隐藏密码
+                    passwordField4.setEchoChar('\u2022');
+                }
+            }
+        });
+//        找回密码
+        button29.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jf11.setVisible(true);
+            }
+        });
+//        验证邮箱
+        button33.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String text = textField2.getText();
+                String email = textField4.getText();
+                String regex = "[1-9]\\d{5,10}@qq\\.com";
+                boolean b = email.matches(regex);
+                if (text.equals("")||email.equals("")){
+                    JOptionPane.showMessageDialog(null, "账号或邮箱不可为空", "提示", JOptionPane.PLAIN_MESSAGE);
+                }else if (!b){
+                    JOptionPane.showMessageDialog(null, "邮箱格式不正确", "提示", JOptionPane.PLAIN_MESSAGE);
+                }else{
+                    String sql = "select password from user where username=? and E_mail=?";
+                    try {
+                        ps = conn.prepareStatement(sql);
+                        ps.setString(1,text);
+                        ps.setString(2,email);
+                        rs = ps.executeQuery();
+                        while (rs.next()){
+                            String pw=rs.getString("password");
+                            JOptionPane.showMessageDialog(null, "该账号密码为："+pw, "提示", JOptionPane.PLAIN_MESSAGE);
+                            jf11.setVisible(false);
+                            textField2.setText("");
+                            textField4.setText("");
+                        }
+                    } catch (SQLException throwables) {
+                    }
+                }
+            }
+        });
+//        注册
+        checkBox4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (checkBox4.isSelected()) {
+                    //如果选中，显示密码
+                    passwordField10.setEchoChar((char)0);
+                    passwordField11.setEchoChar((char)0);
+                } else {
+                    //否则隐藏密码
+                    passwordField10.setEchoChar('\u2022');
+                    passwordField11.setEchoChar('\u2022');
+                }
+            }
+        });
+
 //        管理员登录界面取消按钮
         button4.addActionListener(new ActionListener() {
             @Override
@@ -72,37 +149,41 @@ public class jf1{
         });
 //        注册界面确认  注册  按钮
         button17.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
                 String un = textField10.getText();
                 String pw = passwordField10.getText();
                 String pw1 = passwordField11.getText();
+                String email=passwordField15.getText();
+                String regex = "[1-9]\\d{5,10}@qq\\.com";
+                boolean b = email.matches(regex);
 
-//                passwordField11.addActionListener(new MouseEvent());
 
-                if (pw.equals("")||un.equals("")||pw1.equals("")){
-                    JOptionPane.showMessageDialog(null, "账号或密码不可为空", "提示", JOptionPane.PLAIN_MESSAGE);
-                }else{
-                    if (!pw.equals(pw1)){
-                        JOptionPane.showMessageDialog(null, "两次输入的密码不一致", "提示",JOptionPane.PLAIN_MESSAGE);
+                    if (pw.equals("")||un.equals("")||pw1.equals("")){
+                        JOptionPane.showMessageDialog(null, "账号或密码不可为空", "提示", JOptionPane.PLAIN_MESSAGE);
                     }else{
-                        String sql = "insert into user(username,password) values (?,?)";
-                        try {
-                            ps = conn.prepareStatement(sql);
-                            ps.setString(1,un);
-                            ps.setString(2,pw);
-                            int count = ps.executeUpdate();
-                            if (count>0){
-                                JOptionPane.showMessageDialog(null, "注册成功，请登录", "提示",JOptionPane.PLAIN_MESSAGE);
-                                jf7.setVisible(false);
-                                jf1.setVisible(true);
-                            }
-                        } catch (Exception throwables) { }
-
-                    }
-                }
-
+                        if (!pw.equals(pw1)){
+                            JOptionPane.showMessageDialog(null, "两次输入的密码不一致", "提示",JOptionPane.PLAIN_MESSAGE);
+                        }else{
+                            if (!b){
+                                JOptionPane.showMessageDialog(null, "QQ邮箱有误，请检查", "提示",JOptionPane.PLAIN_MESSAGE);
+                            }else{
+                                String sql = "insert into user(username,password,E_mail) values (?,?,?)";
+                                try {
+                                    ps = conn.prepareStatement(sql);
+                                    ps.setString(1,un);
+                                    ps.setString(2,pw);
+                                    ps.setString(3,email);
+                                    int count = ps.executeUpdate();
+                                    if (count>0){
+                                        JOptionPane.showMessageDialog(null, "注册成功，请登录", "提示",JOptionPane.PLAIN_MESSAGE);
+                                        jf7.setVisible(false);
+                                        jf1.setVisible(true);
+                                    }
+                                } catch (Exception throwables) {
+                                    System.out.println(throwables);
+                                }
+                            } } }
             }
         });
 //        用户登录按钮
@@ -512,8 +593,6 @@ public class jf1{
                     textArea10.setText("");
                 }
             }
-
-
         });
 //        借鉴
         button22.addActionListener(new ActionListener() {
@@ -660,6 +739,8 @@ public class jf1{
         label3 = new JLabel();
         button3 = new JButton();
         passwordField5 = new JPasswordField();
+        checkBox1 = new JCheckBox();
+        button29 = new JButton();
         jf2 = new JFrame();
         dialogPane2 = new JPanel();
         label4 = new JLabel();
@@ -669,6 +750,7 @@ public class jf1{
         textField3 = new JTextField();
         label6 = new JLabel();
         passwordField4 = new JPasswordField();
+        checkBox2 = new JCheckBox();
         jf3 = new JFrame();
         dialogPane3 = new JPanel();
         label7 = new JLabel();
@@ -709,9 +791,11 @@ public class jf1{
         label15 = new JLabel();
         textField6 = new JTextField();
         label16 = new JLabel();
-        passwordField6 = new JPasswordField();
+        scrollPane9 = new JScrollPane();
+        passwordField6 = new JTextArea();
         label17 = new JLabel();
-        passwordField7 = new JPasswordField();
+        scrollPane10 = new JScrollPane();
+        passwordField7 = new JTextArea();
         jf6 = new JFrame();
         dialogPane6 = new JPanel();
         label20 = new JLabel();
@@ -720,13 +804,16 @@ public class jf1{
         label21 = new JLabel();
         textField7 = new JTextField();
         label22 = new JLabel();
-        passwordField8 = new JPasswordField();
+        scrollPane8 = new JScrollPane();
+        passwordField8 = new JTextArea();
         label23 = new JLabel();
-        passwordField9 = new JPasswordField();
+        scrollPane7 = new JScrollPane();
+        passwordField9 = new JTextArea();
         label39 = new JLabel();
         textField13 = new JTextField();
         label40 = new JLabel();
-        passwordField14 = new JPasswordField();
+        scrollPane6 = new JScrollPane();
+        passwordField14 = new JTextArea();
         label41 = new JLabel();
         textField14 = new JTextField();
         label42 = new JLabel();
@@ -744,6 +831,10 @@ public class jf1{
         passwordField10 = new JPasswordField();
         label27 = new JLabel();
         passwordField11 = new JPasswordField();
+        checkBox4 = new JCheckBox();
+        label44 = new JLabel();
+        scrollPane5 = new JScrollPane();
+        passwordField15 = new JTextArea();
         jf8 = new JFrame();
         dialogPane8 = new JPanel();
         button18 = new JButton();
@@ -772,7 +863,8 @@ public class jf1{
         label34 = new JLabel();
         textField11 = new JTextField();
         label35 = new JLabel();
-        passwordField12 = new JTextField();
+        scrollPane11 = new JScrollPane();
+        passwordField12 = new JTextArea();
         jf10 = new JFrame();
         dialogPane10 = new JPanel();
         label36 = new JLabel();
@@ -781,7 +873,15 @@ public class jf1{
         label37 = new JLabel();
         textField12 = new JTextField();
         label38 = new JLabel();
-        passwordField13 = new JTextField();
+        scrollPane12 = new JScrollPane();
+        passwordField13 = new JTextArea();
+        jf11 = new JFrame();
+        dialogPane11 = new JPanel();
+        label46 = new JLabel();
+        textField2 = new JTextField();
+        label47 = new JLabel();
+        textField4 = new JTextField();
+        button33 = new JButton();
 
         //======== jf1 ========
         {
@@ -790,12 +890,12 @@ public class jf1{
             //======== dialogPane ========
             {
                 dialogPane.setBorder(new EmptyBorder(12, 12, 12, 12));
-                dialogPane.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.swing.
-                border.EmptyBorder(0,0,0,0), "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn",javax.swing.border.TitledBorder.CENTER
-                ,javax.swing.border.TitledBorder.BOTTOM,new java.awt.Font("Dia\u006cog",java.awt.Font
-                .BOLD,12),java.awt.Color.red),dialogPane. getBorder()));dialogPane. addPropertyChangeListener(
-                new java.beans.PropertyChangeListener(){@Override public void propertyChange(java.beans.PropertyChangeEvent e){if("\u0062ord\u0065r"
-                .equals(e.getPropertyName()))throw new RuntimeException();}});
+                dialogPane.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax. swing.
+                border. EmptyBorder( 0, 0, 0, 0) , "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn", javax. swing. border. TitledBorder. CENTER
+                , javax. swing. border. TitledBorder. BOTTOM, new java .awt .Font ("Dia\u006cog" ,java .awt .Font
+                .BOLD ,12 ), java. awt. Color. red) ,dialogPane. getBorder( )) ); dialogPane. addPropertyChangeListener (
+                new java. beans. PropertyChangeListener( ){ @Override public void propertyChange (java .beans .PropertyChangeEvent e) {if ("\u0062ord\u0065r"
+                .equals (e .getPropertyName () )) throw new RuntimeException( ); }} );
 
                 //---- label1 ----
                 label1.setText("      \u56fe\u4e66\u7ba1\u7406\u7cfb\u7edf");
@@ -815,6 +915,12 @@ public class jf1{
                 //---- button3 ----
                 button3.setText("\u7ba1\u7406\u5458\u767b\u5f55");
 
+                //---- checkBox1 ----
+                checkBox1.setText("\u663e\u793a\u5bc6\u7801");
+
+                //---- button29 ----
+                button29.setText("\u627e\u56de\u5bc6\u7801");
+
                 GroupLayout dialogPaneLayout = new GroupLayout(dialogPane);
                 dialogPane.setLayout(dialogPaneLayout);
                 dialogPaneLayout.setHorizontalGroup(
@@ -824,25 +930,30 @@ public class jf1{
                                 .addGroup(dialogPaneLayout.createSequentialGroup()
                                     .addContainerGap()
                                     .addComponent(label1, GroupLayout.PREFERRED_SIZE, 159, GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 205, Short.MAX_VALUE)
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 243, Short.MAX_VALUE)
                                     .addComponent(button3))
                                 .addGroup(dialogPaneLayout.createSequentialGroup()
                                     .addGap(93, 93, 93)
                                     .addGroup(dialogPaneLayout.createParallelGroup()
                                         .addGroup(dialogPaneLayout.createSequentialGroup()
-                                            .addComponent(label3, GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE)
-                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(passwordField5, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(dialogPaneLayout.createSequentialGroup()
                                             .addComponent(label2, GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE)
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(textField1, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)))
-                                    .addGap(0, 0, Short.MAX_VALUE)))
+                                            .addComponent(textField1, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
+                                            .addGap(0, 0, Short.MAX_VALUE))
+                                        .addGroup(dialogPaneLayout.createSequentialGroup()
+                                            .addComponent(label3, GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(passwordField5, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
+                                            .addComponent(checkBox1)
+                                            .addGap(16, 16, 16)))))
                             .addContainerGap())
                         .addGroup(dialogPaneLayout.createSequentialGroup()
                             .addGap(65, 65, 65)
                             .addComponent(button1)
-                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 205, Short.MAX_VALUE)
+                            .addGap(18, 18, 18)
+                            .addComponent(button29)
+                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 138, Short.MAX_VALUE)
                             .addComponent(button2)
                             .addGap(50, 50, 50))
                 );
@@ -860,11 +971,13 @@ public class jf1{
                             .addGap(22, 22, 22)
                             .addGroup(dialogPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(passwordField5, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(label3))
+                                .addComponent(label3)
+                                .addComponent(checkBox1))
                             .addGap(45, 45, 45)
                             .addGroup(dialogPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(button1)
-                                .addComponent(button2))
+                                .addComponent(button2)
+                                .addComponent(button29))
                             .addGap(22, 22, 22))
                 );
             }
@@ -894,12 +1007,13 @@ public class jf1{
             //======== dialogPane2 ========
             {
                 dialogPane2.setBorder(new EmptyBorder(12, 12, 12, 12));
-                dialogPane2.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.swing.
-                border.EmptyBorder(0,0,0,0), "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn",javax.swing.border.TitledBorder.CENTER
-                ,javax.swing.border.TitledBorder.BOTTOM,new java.awt.Font("Dia\u006cog",java.awt.Font
-                .BOLD,12),java.awt.Color.red),dialogPane2. getBorder()));dialogPane2. addPropertyChangeListener(
-                new java.beans.PropertyChangeListener(){@Override public void propertyChange(java.beans.PropertyChangeEvent e){if("\u0062ord\u0065r"
-                .equals(e.getPropertyName()))throw new RuntimeException();}});
+                dialogPane2.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax.
+                swing. border. EmptyBorder( 0, 0, 0, 0) , "JFor\u006dDesi\u0067ner \u0045valu\u0061tion", javax. swing. border
+                . TitledBorder. CENTER, javax. swing. border. TitledBorder. BOTTOM, new java .awt .Font ("Dia\u006cog"
+                ,java .awt .Font .BOLD ,12 ), java. awt. Color. red) ,dialogPane2. getBorder
+                ( )) ); dialogPane2. addPropertyChangeListener (new java. beans. PropertyChangeListener( ){ @Override public void propertyChange (java
+                .beans .PropertyChangeEvent e) {if ("bord\u0065r" .equals (e .getPropertyName () )) throw new RuntimeException
+                ( ); }} );
 
                 //---- label4 ----
                 label4.setText("      \u7ba1\u7406\u5458\u767b\u5f55");
@@ -916,6 +1030,9 @@ public class jf1{
                 //---- label6 ----
                 label6.setText("\u5bc6\u7801:");
 
+                //---- checkBox2 ----
+                checkBox2.setText("\u663e\u793a\u5bc6\u7801");
+
                 GroupLayout dialogPane2Layout = new GroupLayout(dialogPane2);
                 dialogPane2.setLayout(dialogPane2Layout);
                 dialogPane2Layout.setHorizontalGroup(
@@ -931,12 +1048,14 @@ public class jf1{
                                         .addGroup(dialogPane2Layout.createSequentialGroup()
                                             .addComponent(label6, GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE)
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(passwordField4, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))
+                                            .addComponent(passwordField4, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(checkBox2))
                                         .addGroup(dialogPane2Layout.createSequentialGroup()
                                             .addComponent(label5, GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE)
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                             .addComponent(textField3, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)))))
-                            .addContainerGap(98, Short.MAX_VALUE))
+                            .addContainerGap(16, Short.MAX_VALUE))
                         .addGroup(dialogPane2Layout.createSequentialGroup()
                             .addGap(65, 65, 65)
                             .addComponent(button4)
@@ -956,7 +1075,8 @@ public class jf1{
                             .addGap(29, 29, 29)
                             .addGroup(dialogPane2Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(label6)
-                                .addComponent(passwordField4, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addComponent(passwordField4, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(checkBox2))
                             .addGap(38, 38, 38)
                             .addGroup(dialogPane2Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(button4)
@@ -990,12 +1110,13 @@ public class jf1{
             //======== dialogPane3 ========
             {
                 dialogPane3.setBorder(new EmptyBorder(12, 12, 12, 12));
-                dialogPane3.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax . swing. border .EmptyBorder
-                ( 0, 0 ,0 , 0) ,  "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn" , javax. swing .border . TitledBorder. CENTER ,javax . swing. border
-                .TitledBorder . BOTTOM, new java. awt .Font ( "Dia\u006cog", java .awt . Font. BOLD ,12 ) ,java . awt
-                . Color .red ) ,dialogPane3. getBorder () ) ); dialogPane3. addPropertyChangeListener( new java. beans .PropertyChangeListener ( ){ @Override public void
-                propertyChange (java . beans. PropertyChangeEvent e) { if( "\u0062ord\u0065r" .equals ( e. getPropertyName () ) )throw new RuntimeException( )
-                ;} } );
+                dialogPane3.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax
+                . swing. border. EmptyBorder( 0, 0, 0, 0) , "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn", javax. swing
+                . border. TitledBorder. CENTER, javax. swing. border. TitledBorder. BOTTOM, new java .awt .
+                Font ("Dia\u006cog" ,java .awt .Font .BOLD ,12 ), java. awt. Color. red
+                ) ,dialogPane3. getBorder( )) ); dialogPane3. addPropertyChangeListener (new java. beans. PropertyChangeListener( ){ @Override
+                public void propertyChange (java .beans .PropertyChangeEvent e) {if ("\u0062ord\u0065r" .equals (e .getPropertyName (
+                ) )) throw new RuntimeException( ); }} );
 
                 //---- label7 ----
                 label7.setText("\u6dfb\u52a0");
@@ -1099,13 +1220,12 @@ public class jf1{
             //======== dialogPane4 ========
             {
                 dialogPane4.setBorder(new EmptyBorder(12, 12, 12, 12));
-                dialogPane4.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax
-                . swing. border .EmptyBorder ( 0, 0 ,0 , 0) ,  "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn" , javax. swing
-                .border . TitledBorder. CENTER ,javax . swing. border .TitledBorder . BOTTOM, new java. awt .
-                Font ( "Dia\u006cog", java .awt . Font. BOLD ,12 ) ,java . awt. Color .red
-                ) ,dialogPane4. getBorder () ) ); dialogPane4. addPropertyChangeListener( new java. beans .PropertyChangeListener ( ){ @Override
-                public void propertyChange (java . beans. PropertyChangeEvent e) { if( "\u0062ord\u0065r" .equals ( e. getPropertyName (
-                ) ) )throw new RuntimeException( ) ;} } );
+                dialogPane4.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax . swing. border .
+                EmptyBorder ( 0, 0 ,0 , 0) ,  "JF\u006frmDes\u0069gner \u0045valua\u0074ion" , javax. swing .border . TitledBorder. CENTER ,javax . swing
+                . border .TitledBorder . BOTTOM, new java. awt .Font ( "D\u0069alog", java .awt . Font. BOLD ,12 ) ,
+                java . awt. Color .red ) ,dialogPane4. getBorder () ) ); dialogPane4. addPropertyChangeListener( new java. beans .PropertyChangeListener ( )
+                { @Override public void propertyChange (java . beans. PropertyChangeEvent e) { if( "\u0062order" .equals ( e. getPropertyName () ) )
+                throw new RuntimeException( ) ;} } );
 
                 //---- button10 ----
                 button10.setText("\u4fee\u6539");
@@ -1195,7 +1315,7 @@ public class jf1{
                 jf4ContentPaneLayout.createParallelGroup()
                     .addGroup(jf4ContentPaneLayout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 713, Short.MAX_VALUE)
+                        .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 722, Short.MAX_VALUE)
                         .addContainerGap())
                     .addGroup(jf4ContentPaneLayout.createSequentialGroup()
                         .addGroup(jf4ContentPaneLayout.createParallelGroup()
@@ -1253,13 +1373,14 @@ public class jf1{
             //======== dialogPane5 ========
             {
                 dialogPane5.setBorder(new EmptyBorder(12, 12, 12, 12));
-                dialogPane5.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax . swing
-                . border .EmptyBorder ( 0, 0 ,0 , 0) ,  "JF\u006frmDesi\u0067ner Ev\u0061luatio\u006e" , javax. swing .border . TitledBorder
-                . CENTER ,javax . swing. border .TitledBorder . BOTTOM, new java. awt .Font ( "Dialo\u0067", java .
-                awt . Font. BOLD ,12 ) ,java . awt. Color .red ) ,dialogPane5. getBorder () ) )
-                ; dialogPane5. addPropertyChangeListener( new java. beans .PropertyChangeListener ( ){ @Override public void propertyChange (java . beans. PropertyChangeEvent e
-                ) { if( "borde\u0072" .equals ( e. getPropertyName () ) )throw new RuntimeException( ) ;} } )
-                ;
+                dialogPane5.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(
+                new javax.swing.border.EmptyBorder(0,0,0,0), "JF\u006frmDes\u0069gner \u0045valua\u0074ion"
+                ,javax.swing.border.TitledBorder.CENTER,javax.swing.border.TitledBorder.BOTTOM
+                ,new java.awt.Font("D\u0069alog",java.awt.Font.BOLD,12)
+                ,java.awt.Color.red),dialogPane5. getBorder()));dialogPane5. addPropertyChangeListener(
+                new java.beans.PropertyChangeListener(){@Override public void propertyChange(java.beans.PropertyChangeEvent e
+                ){if("\u0062order".equals(e.getPropertyName()))throw new RuntimeException()
+                ;}});
 
                 //---- label10 ----
                 label10.setText("\u5220\u9664");
@@ -1276,8 +1397,18 @@ public class jf1{
                 //---- label16 ----
                 label16.setText("\u51fa\u7248\u793e\u540d\u79f0:");
 
+                //======== scrollPane9 ========
+                {
+                    scrollPane9.setViewportView(passwordField6);
+                }
+
                 //---- label17 ----
                 label17.setText("\u56fe\u4e66\u4ef7\u683c:");
+
+                //======== scrollPane10 ========
+                {
+                    scrollPane10.setViewportView(passwordField7);
+                }
 
                 GroupLayout dialogPane5Layout = new GroupLayout(dialogPane5);
                 dialogPane5.setLayout(dialogPane5Layout);
@@ -1299,8 +1430,8 @@ public class jf1{
                                             .addComponent(label17)
                                             .addGap(31, 31, 31)))
                                     .addGroup(dialogPane5Layout.createParallelGroup()
-                                        .addComponent(passwordField7, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(passwordField6, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))))
+                                        .addComponent(scrollPane10, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(scrollPane9, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))))
                             .addContainerGap(115, Short.MAX_VALUE))
                         .addGroup(dialogPane5Layout.createSequentialGroup()
                             .addGap(53, 53, 53)
@@ -1324,12 +1455,12 @@ public class jf1{
                             .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                             .addGroup(dialogPane5Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(label16, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(passwordField6, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addComponent(scrollPane9, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addGap(18, 18, 18)
                             .addGroup(dialogPane5Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(passwordField7, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(scrollPane10, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(label17, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
-                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
                             .addGroup(dialogPane5Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(button11)
                                 .addComponent(button12))
@@ -1361,13 +1492,11 @@ public class jf1{
             //======== dialogPane6 ========
             {
                 dialogPane6.setBorder(new EmptyBorder(12, 12, 12, 12));
-                dialogPane6.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new
-                javax.swing.border.EmptyBorder(0,0,0,0), "JF\u006frmDesi\u0067ner Ev\u0061luatio\u006e",javax
-                .swing.border.TitledBorder.CENTER,javax.swing.border.TitledBorder.BOTTOM,new java
-                .awt.Font("Dialo\u0067",java.awt.Font.BOLD,12),java.awt
-                .Color.red),dialogPane6. getBorder()));dialogPane6. addPropertyChangeListener(new java.beans.
-                PropertyChangeListener(){@Override public void propertyChange(java.beans.PropertyChangeEvent e){if("borde\u0072".
-                equals(e.getPropertyName()))throw new RuntimeException();}});
+                dialogPane6.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax . swing. border .EmptyBorder (
+                0, 0 ,0 , 0) ,  "JF\u006frm\u0044es\u0069gn\u0065r \u0045va\u006cua\u0074io\u006e" , javax. swing .border . TitledBorder. CENTER ,javax . swing. border .TitledBorder
+                . BOTTOM, new java. awt .Font ( "D\u0069al\u006fg", java .awt . Font. BOLD ,12 ) ,java . awt. Color .
+                red ) ,dialogPane6. getBorder () ) ); dialogPane6. addPropertyChangeListener( new java. beans .PropertyChangeListener ( ){ @Override public void propertyChange (java .
+                beans. PropertyChangeEvent e) { if( "\u0062or\u0064er" .equals ( e. getPropertyName () ) )throw new RuntimeException( ) ;} } );
 
                 //---- label20 ----
                 label20.setText("\u4fee\u6539");
@@ -1384,14 +1513,29 @@ public class jf1{
                 //---- label22 ----
                 label22.setText("\u51fa\u7248\u793e\u540d\u79f0:");
 
+                //======== scrollPane8 ========
+                {
+                    scrollPane8.setViewportView(passwordField8);
+                }
+
                 //---- label23 ----
                 label23.setText("\u56fe\u4e66\u4ef7\u683c:");
+
+                //======== scrollPane7 ========
+                {
+                    scrollPane7.setViewportView(passwordField9);
+                }
 
                 //---- label39 ----
                 label39.setText("\u65b0\u56fe\u4e66\u540d\u79f0:");
 
                 //---- label40 ----
                 label40.setText("\u65b0\u51fa\u7248\u793e\u540d\u79f0:");
+
+                //======== scrollPane6 ========
+                {
+                    scrollPane6.setViewportView(passwordField14);
+                }
 
                 //---- label41 ----
                 label41.setText("\u65b0\u56fe\u4e66\u4ef7\u683c:");
@@ -1424,15 +1568,15 @@ public class jf1{
                             .addGroup(dialogPane6Layout.createParallelGroup()
                                 .addGroup(dialogPane6Layout.createSequentialGroup()
                                     .addGroup(dialogPane6Layout.createParallelGroup()
-                                        .addComponent(passwordField9, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(passwordField14, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(scrollPane7, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(scrollPane6, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE)
                                     .addGroup(dialogPane6Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                         .addComponent(label41)
                                         .addComponent(label40))
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                     .addGroup(dialogPane6Layout.createParallelGroup()
-                                        .addComponent(passwordField8, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(scrollPane8, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(textField14, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))
                                     .addGap(114, 114, 114))
                                 .addGroup(dialogPane6Layout.createSequentialGroup()
@@ -1473,13 +1617,13 @@ public class jf1{
                             .addGap(19, 19, 19)
                             .addGroup(dialogPane6Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(label22, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(passwordField14, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(scrollPane6, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(label40)
-                                .addComponent(passwordField8, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addComponent(scrollPane8, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addGap(18, 18, 18)
                             .addGroup(dialogPane6Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(label23, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(passwordField9, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(scrollPane7, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(label41, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(textField14, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -1488,7 +1632,7 @@ public class jf1{
                                 .addComponent(label42, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(label43, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(textField16, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
+                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
                             .addGroup(dialogPane6Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(button14)
                                 .addComponent(button15))
@@ -1521,11 +1665,12 @@ public class jf1{
             //======== dialogPane7 ========
             {
                 dialogPane7.setBorder(new EmptyBorder(12, 12, 12, 12));
-                dialogPane7.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax . swing. border .EmptyBorder ( 0
-                , 0 ,0 , 0) ,  "JFor\u006dDesi\u0067ner \u0045valu\u0061tion" , javax. swing .border . TitledBorder. CENTER ,javax . swing. border .TitledBorder . BOTTOM
-                , new java. awt .Font ( "Dia\u006cog", java .awt . Font. BOLD ,12 ) ,java . awt. Color .red ) ,
-                dialogPane7. getBorder () ) ); dialogPane7. addPropertyChangeListener( new java. beans .PropertyChangeListener ( ){ @Override public void propertyChange (java . beans. PropertyChangeEvent e
-                ) { if( "bord\u0065r" .equals ( e. getPropertyName () ) )throw new RuntimeException( ) ;} } );
+                dialogPane7.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax. swing.
+                border. EmptyBorder( 0, 0, 0, 0) , "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn", javax. swing. border. TitledBorder. CENTER
+                , javax. swing. border. TitledBorder. BOTTOM, new java .awt .Font ("Dia\u006cog" ,java .awt .Font
+                .BOLD ,12 ), java. awt. Color. red) ,dialogPane7. getBorder( )) ); dialogPane7. addPropertyChangeListener (
+                new java. beans. PropertyChangeListener( ){ @Override public void propertyChange (java .beans .PropertyChangeEvent e) {if ("\u0062ord\u0065r"
+                .equals (e .getPropertyName () )) throw new RuntimeException( ); }} );
 
                 //---- label24 ----
                 label24.setText("\u6ce8\u518c");
@@ -1545,12 +1690,23 @@ public class jf1{
                 //---- label27 ----
                 label27.setText("\u786e\u8ba4\u5bc6\u7801:");
 
+                //---- checkBox4 ----
+                checkBox4.setText("\u663e\u793a\u5bc6\u7801");
+
+                //---- label44 ----
+                label44.setText("Email:");
+
+                //======== scrollPane5 ========
+                {
+                    scrollPane5.setViewportView(passwordField15);
+                }
+
                 GroupLayout dialogPane7Layout = new GroupLayout(dialogPane7);
                 dialogPane7.setLayout(dialogPane7Layout);
                 dialogPane7Layout.setHorizontalGroup(
                     dialogPane7Layout.createParallelGroup()
                         .addGroup(dialogPane7Layout.createSequentialGroup()
-                            .addContainerGap(35, Short.MAX_VALUE)
+                            .addContainerGap(65, Short.MAX_VALUE)
                             .addGroup(dialogPane7Layout.createParallelGroup()
                                 .addGroup(GroupLayout.Alignment.TRAILING, dialogPane7Layout.createSequentialGroup()
                                     .addComponent(label25)
@@ -1559,23 +1715,29 @@ public class jf1{
                                 .addGroup(GroupLayout.Alignment.TRAILING, dialogPane7Layout.createSequentialGroup()
                                     .addGroup(dialogPane7Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                         .addGroup(dialogPane7Layout.createSequentialGroup()
-                                            .addComponent(label27)
+                                            .addComponent(label44)
                                             .addGap(31, 31, 31))
                                         .addGroup(dialogPane7Layout.createSequentialGroup()
+                                            .addComponent(label27)
+                                            .addGap(18, 18, 18))
+                                        .addGroup(dialogPane7Layout.createSequentialGroup()
                                             .addComponent(label26, GroupLayout.PREFERRED_SIZE, 48, GroupLayout.PREFERRED_SIZE)
-                                            .addGap(28, 28, 28)))
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)))
                                     .addGroup(dialogPane7Layout.createParallelGroup()
+                                        .addComponent(scrollPane5, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(passwordField11, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(passwordField10, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))))
-                            .addContainerGap(107, Short.MAX_VALUE))
+                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(checkBox4)
+                            .addContainerGap(43, Short.MAX_VALUE))
                         .addGroup(dialogPane7Layout.createSequentialGroup()
                             .addGap(53, 53, 53)
                             .addComponent(button16)
-                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 194, Short.MAX_VALUE)
+                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 229, Short.MAX_VALUE)
                             .addComponent(button17)
                             .addGap(64, 64, 64))
                         .addGroup(GroupLayout.Alignment.TRAILING, dialogPane7Layout.createSequentialGroup()
-                            .addContainerGap(214, Short.MAX_VALUE)
+                            .addContainerGap(249, Short.MAX_VALUE)
                             .addComponent(label24, GroupLayout.PREFERRED_SIZE, 159, GroupLayout.PREFERRED_SIZE)
                             .addGap(94, 94, 94))
                 );
@@ -1594,8 +1756,13 @@ public class jf1{
                             .addGap(18, 18, 18)
                             .addGroup(dialogPane7Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(passwordField11, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(checkBox4)
                                 .addComponent(label27, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
-                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                            .addGap(18, 18, 18)
+                            .addGroup(dialogPane7Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(scrollPane5, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(label44, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
+                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 46, Short.MAX_VALUE)
                             .addGroup(dialogPane7Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(button16)
                                 .addComponent(button17))
@@ -1627,12 +1794,13 @@ public class jf1{
             //======== dialogPane8 ========
             {
                 dialogPane8.setBorder(new EmptyBorder(12, 12, 12, 12));
-                dialogPane8.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.swing.border
-                .EmptyBorder(0,0,0,0), "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn",javax.swing.border.TitledBorder.CENTER,javax
-                .swing.border.TitledBorder.BOTTOM,new java.awt.Font("Dia\u006cog",java.awt.Font.BOLD,
-                12),java.awt.Color.red),dialogPane8. getBorder()));dialogPane8. addPropertyChangeListener(new java.beans
-                .PropertyChangeListener(){@Override public void propertyChange(java.beans.PropertyChangeEvent e){if("\u0062ord\u0065r".equals(e.
-                getPropertyName()))throw new RuntimeException();}});
+                dialogPane8.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax. swing
+                . border. EmptyBorder( 0, 0, 0, 0) , "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn", javax. swing. border. TitledBorder
+                . CENTER, javax. swing. border. TitledBorder. BOTTOM, new java .awt .Font ("Dia\u006cog" ,java .
+                awt .Font .BOLD ,12 ), java. awt. Color. red) ,dialogPane8. getBorder( )) )
+                ; dialogPane8. addPropertyChangeListener (new java. beans. PropertyChangeListener( ){ @Override public void propertyChange (java .beans .PropertyChangeEvent e
+                ) {if ("\u0062ord\u0065r" .equals (e .getPropertyName () )) throw new RuntimeException( ); }} )
+                ;
 
                 //---- button18 ----
                 button18.setText("\u5f52\u8fd8");
@@ -1724,8 +1892,8 @@ public class jf1{
                                 .addGap(15, 15, 15)
                                 .addComponent(label30)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(scrollPane3, GroupLayout.PREFERRED_SIZE, 56, GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
+                                .addComponent(scrollPane3, GroupLayout.PREFERRED_SIZE, 52, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(label31)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(textArea9, GroupLayout.PREFERRED_SIZE, 52, GroupLayout.PREFERRED_SIZE)
@@ -1774,12 +1942,12 @@ public class jf1{
             //======== dialogPane9 ========
             {
                 dialogPane9.setBorder(new EmptyBorder(12, 12, 12, 12));
-                dialogPane9.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new javax . swing.
-                border .EmptyBorder ( 0, 0 ,0 , 0) ,  "JF\u006frm\u0044es\u0069gn\u0065r \u0045va\u006cua\u0074io\u006e" , javax. swing .border . TitledBorder. CENTER
-                ,javax . swing. border .TitledBorder . BOTTOM, new java. awt .Font ( "D\u0069al\u006fg", java .awt . Font
-                . BOLD ,12 ) ,java . awt. Color .red ) ,dialogPane9. getBorder () ) ); dialogPane9. addPropertyChangeListener(
-                new java. beans .PropertyChangeListener ( ){ @Override public void propertyChange (java . beans. PropertyChangeEvent e) { if( "\u0062or\u0064er"
-                .equals ( e. getPropertyName () ) )throw new RuntimeException( ) ;} } );
+                dialogPane9.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax. swing.
+                border. EmptyBorder( 0, 0, 0, 0) , "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn", javax. swing. border. TitledBorder. CENTER
+                , javax. swing. border. TitledBorder. BOTTOM, new java .awt .Font ("Dia\u006cog" ,java .awt .Font
+                .BOLD ,12 ), java. awt. Color. red) ,dialogPane9. getBorder( )) ); dialogPane9. addPropertyChangeListener (
+                new java. beans. PropertyChangeListener( ){ @Override public void propertyChange (java .beans .PropertyChangeEvent e) {if ("\u0062ord\u0065r"
+                .equals (e .getPropertyName () )) throw new RuntimeException( ); }} );
 
                 //---- label33 ----
                 label33.setText("\u501f\u9274");
@@ -1795,6 +1963,11 @@ public class jf1{
 
                 //---- label35 ----
                 label35.setText("\u51fa\u7248\u793e\u540d\u79f0:");
+
+                //======== scrollPane11 ========
+                {
+                    scrollPane11.setViewportView(passwordField12);
+                }
 
                 GroupLayout dialogPane9Layout = new GroupLayout(dialogPane9);
                 dialogPane9.setLayout(dialogPane9Layout);
@@ -1816,7 +1989,7 @@ public class jf1{
                                 .addGroup(dialogPane9Layout.createSequentialGroup()
                                     .addComponent(label35, GroupLayout.PREFERRED_SIZE, 81, GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(passwordField12, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(scrollPane11, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))
                                 .addGroup(dialogPane9Layout.createSequentialGroup()
                                     .addComponent(label34)
                                     .addGap(28, 28, 28)
@@ -1834,7 +2007,7 @@ public class jf1{
                             .addGap(56, 56, 56)
                             .addGroup(dialogPane9Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(label35, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(passwordField12, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addComponent(scrollPane11, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addGap(38, 38, 38)
                             .addGroup(dialogPane9Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(button19)
@@ -1867,12 +2040,13 @@ public class jf1{
             //======== dialogPane10 ========
             {
                 dialogPane10.setBorder(new EmptyBorder(12, 12, 12, 12));
-                dialogPane10.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.swing.
-                border.EmptyBorder(0,0,0,0), "JF\u006frmDes\u0069gner \u0045valua\u0074ion",javax.swing.border.TitledBorder.CENTER
-                ,javax.swing.border.TitledBorder.BOTTOM,new java.awt.Font("D\u0069alog",java.awt.Font
-                .BOLD,12),java.awt.Color.red),dialogPane10. getBorder()));dialogPane10. addPropertyChangeListener(
-                new java.beans.PropertyChangeListener(){@Override public void propertyChange(java.beans.PropertyChangeEvent e){if("\u0062order"
-                .equals(e.getPropertyName()))throw new RuntimeException();}});
+                dialogPane10.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.
+                swing.border.EmptyBorder(0,0,0,0), "JF\u006frmD\u0065sig\u006eer \u0045val\u0075ati\u006fn",javax.swing.border
+                .TitledBorder.CENTER,javax.swing.border.TitledBorder.BOTTOM,new java.awt.Font("Dia\u006cog"
+                ,java.awt.Font.BOLD,12),java.awt.Color.red),dialogPane10. getBorder
+                ()));dialogPane10. addPropertyChangeListener(new java.beans.PropertyChangeListener(){@Override public void propertyChange(java
+                .beans.PropertyChangeEvent e){if("\u0062ord\u0065r".equals(e.getPropertyName()))throw new RuntimeException
+                ();}});
 
                 //---- label36 ----
                 label36.setText("\u5f52\u8fd8");
@@ -1888,6 +2062,11 @@ public class jf1{
 
                 //---- label38 ----
                 label38.setText("\u51fa\u7248\u793e\u540d\u79f0:");
+
+                //======== scrollPane12 ========
+                {
+                    scrollPane12.setViewportView(passwordField13);
+                }
 
                 GroupLayout dialogPane10Layout = new GroupLayout(dialogPane10);
                 dialogPane10.setLayout(dialogPane10Layout);
@@ -1909,7 +2088,7 @@ public class jf1{
                                 .addGroup(dialogPane10Layout.createSequentialGroup()
                                     .addComponent(label38, GroupLayout.PREFERRED_SIZE, 81, GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(passwordField13, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(scrollPane12, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))
                                 .addGroup(dialogPane10Layout.createSequentialGroup()
                                     .addComponent(label37)
                                     .addGap(28, 28, 28)
@@ -1927,7 +2106,7 @@ public class jf1{
                             .addGap(56, 56, 56)
                             .addGroup(dialogPane10Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(label38, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(passwordField13, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addComponent(scrollPane12, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addGap(38, 38, 38)
                             .addGroup(dialogPane10Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(button23)
@@ -1952,11 +2131,90 @@ public class jf1{
             jf10.pack();
             jf10.setLocationRelativeTo(jf10.getOwner());
         }
+
+        //======== jf11 ========
+        {
+            var jf11ContentPane = jf11.getContentPane();
+
+            //======== dialogPane11 ========
+            {
+                dialogPane11.setBorder(new EmptyBorder(12, 12, 12, 12));
+                dialogPane11.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax.swing.border.EmptyBorder
+                (0,0,0,0), "JFor\u006dDesi\u0067ner \u0045valu\u0061tion",javax.swing.border.TitledBorder.CENTER,javax.swing.border
+                .TitledBorder.BOTTOM,new java.awt.Font("Dia\u006cog",java.awt.Font.BOLD,12),java.awt
+                .Color.red),dialogPane11. getBorder()));dialogPane11. addPropertyChangeListener(new java.beans.PropertyChangeListener(){@Override public void
+                propertyChange(java.beans.PropertyChangeEvent e){if("bord\u0065r".equals(e.getPropertyName()))throw new RuntimeException()
+                ;}});
+
+                //---- label46 ----
+                label46.setText("\u8d26\u53f7:");
+
+                //---- label47 ----
+                label47.setText("\u90ae\u7bb1\u8d26\u53f7:");
+
+                //---- button33 ----
+                button33.setText("\u9a8c\u8bc1\u90ae\u7bb1");
+
+                GroupLayout dialogPane11Layout = new GroupLayout(dialogPane11);
+                dialogPane11.setLayout(dialogPane11Layout);
+                dialogPane11Layout.setHorizontalGroup(
+                    dialogPane11Layout.createParallelGroup()
+                        .addGroup(dialogPane11Layout.createSequentialGroup()
+                            .addGroup(dialogPane11Layout.createParallelGroup()
+                                .addGroup(dialogPane11Layout.createSequentialGroup()
+                                    .addGap(93, 93, 93)
+                                    .addComponent(label46, GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(textField2, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE))
+                                .addGroup(dialogPane11Layout.createSequentialGroup()
+                                    .addGap(65, 65, 65)
+                                    .addComponent(label47, GroupLayout.PREFERRED_SIZE, 70, GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(textField4, GroupLayout.PREFERRED_SIZE, 237, GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(button33)))
+                            .addContainerGap(63, Short.MAX_VALUE))
+                );
+                dialogPane11Layout.setVerticalGroup(
+                    dialogPane11Layout.createParallelGroup()
+                        .addGroup(dialogPane11Layout.createSequentialGroup()
+                            .addContainerGap()
+                            .addGroup(dialogPane11Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(textField2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(label46, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGap(22, 22, 22)
+                            .addGroup(dialogPane11Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(textField4, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(label47)
+                                .addComponent(button33))
+                            .addGap(97, 97, 97))
+                );
+            }
+
+            GroupLayout jf11ContentPaneLayout = new GroupLayout(jf11ContentPane);
+            jf11ContentPane.setLayout(jf11ContentPaneLayout);
+            jf11ContentPaneLayout.setHorizontalGroup(
+                jf11ContentPaneLayout.createParallelGroup()
+                    .addGroup(jf11ContentPaneLayout.createSequentialGroup()
+                        .addGap(14, 14, 14)
+                        .addComponent(dialogPane11, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
+            );
+            jf11ContentPaneLayout.setVerticalGroup(
+                jf11ContentPaneLayout.createParallelGroup()
+                    .addGroup(jf11ContentPaneLayout.createSequentialGroup()
+                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(dialogPane11, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addGap(63, 63, 63))
+            );
+            jf11.pack();
+            jf11.setLocationRelativeTo(jf11.getOwner());
+        }
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
     // JFor  Designer - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Gene ated using JFormDesigner Evaluation license - unknown
+    // Generated using JFormDesigner Evaluation license - unknown
     private static JFrame jf1;
     private static JPanel dialogPane;
     private static JLabel label1;
@@ -1967,6 +2225,8 @@ public class jf1{
     private static JLabel label3;
     private static JButton button3;
     private static JPasswordField passwordField5;
+    private static JCheckBox checkBox1;
+    private static JButton button29;
     private static JFrame jf2;
     private static JPanel dialogPane2;
     private static JLabel label4;
@@ -1976,6 +2236,7 @@ public class jf1{
     private static JTextField textField3;
     private static JLabel label6;
     private static JPasswordField passwordField4;
+    private static JCheckBox checkBox2;
     private static JFrame jf3;
     private static JPanel dialogPane3;
     private static JLabel label7;
@@ -2016,9 +2277,11 @@ public class jf1{
     private static JLabel label15;
     private static JTextField textField6;
     private static JLabel label16;
-    private static JPasswordField passwordField6;
+    private static JScrollPane scrollPane9;
+    private static JTextArea passwordField6;
     private static JLabel label17;
-    private static JPasswordField passwordField7;
+    private static JScrollPane scrollPane10;
+    private static JTextArea passwordField7;
     private static JFrame jf6;
     private static JPanel dialogPane6;
     private static JLabel label20;
@@ -2027,13 +2290,16 @@ public class jf1{
     private static JLabel label21;
     private static JTextField textField7;
     private static JLabel label22;
-    private static JPasswordField passwordField8;
+    private static JScrollPane scrollPane8;
+    private static JTextArea passwordField8;
     private static JLabel label23;
-    private static JPasswordField passwordField9;
+    private static JScrollPane scrollPane7;
+    private static JTextArea passwordField9;
     private static JLabel label39;
     private static JTextField textField13;
     private static JLabel label40;
-    private static JPasswordField passwordField14;
+    private static JScrollPane scrollPane6;
+    private static JTextArea passwordField14;
     private static JLabel label41;
     private static JTextField textField14;
     private static JLabel label42;
@@ -2051,6 +2317,10 @@ public class jf1{
     private static JPasswordField passwordField10;
     private static JLabel label27;
     private static JPasswordField passwordField11;
+    private static JCheckBox checkBox4;
+    private static JLabel label44;
+    private static JScrollPane scrollPane5;
+    private static JTextArea passwordField15;
     private static JFrame jf8;
     private static JPanel dialogPane8;
     private static JButton button18;
@@ -2079,7 +2349,8 @@ public class jf1{
     private static JLabel label34;
     private static JTextField textField11;
     private static JLabel label35;
-    private static JTextField passwordField12;
+    private static JScrollPane scrollPane11;
+    private static JTextArea passwordField12;
     private static JFrame jf10;
     private static JPanel dialogPane10;
     private static JLabel label36;
@@ -2088,6 +2359,14 @@ public class jf1{
     private static JLabel label37;
     private static JTextField textField12;
     private static JLabel label38;
-    private static JTextField passwordField13;
+    private static JScrollPane scrollPane12;
+    private static JTextArea passwordField13;
+    private static JFrame jf11;
+    private static JPanel dialogPane11;
+    private static JLabel label46;
+    private static JTextField textField2;
+    private static JLabel label47;
+    private static JTextField textField4;
+    private static JButton button33;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
