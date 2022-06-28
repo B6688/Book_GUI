@@ -1,6 +1,10 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.sql.DataSource;
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.event.AncestorListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
@@ -12,6 +16,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class jf1{
+    static final Logger LOGGER= LoggerFactory.getLogger("text.class");
     static Connection conn;
     static PreparedStatement ps = null;
     static ResultSet rs;
@@ -26,6 +31,7 @@ public class jf1{
         try {
             conn= DriverManager.getConnection(url, user, password);
         } catch (Exception throwables) { }
+        LOGGER.info("静态代码块加载完成，数据库连接成功!!!");
     }
     public static void main(String[] args) {
         jf1();
@@ -89,13 +95,15 @@ public class jf1{
                 }else if (!b){
                     JOptionPane.showMessageDialog(null, "邮箱格式不正确", "提示", JOptionPane.PLAIN_MESSAGE);
                 }else{
-                    String sql = "select password from user where username=? and E_mail=?";
+                    String sql = "select * from user where username=? and E_mail=?";
                     try {
                         ps = conn.prepareStatement(sql);
                         ps.setString(1,text);
                         ps.setString(2,email);
                         rs = ps.executeQuery();
                         while (rs.next()){
+                            String un=rs.getString("username");
+                            LOGGER.info("用户："+un+"-->找回了密码");
                             String pw=rs.getString("password");
                             JOptionPane.showMessageDialog(null, "该账号密码为："+pw, "提示", JOptionPane.PLAIN_MESSAGE);
                             jf11.setVisible(false);
@@ -103,7 +111,9 @@ public class jf1{
                             textField4.setText("");
                         }
                     } catch (SQLException throwables) {
+                        System.out.println(throwables);
                     }
+
                 }
             }
         });
@@ -157,8 +167,6 @@ public class jf1{
                 String email=passwordField15.getText();
                 String regex = "[1-9]\\d{5,10}@qq\\.com";
                 boolean b = email.matches(regex);
-
-
                     if (pw.equals("")||un.equals("")||pw1.equals("")){
                         JOptionPane.showMessageDialog(null, "账号或密码不可为空", "提示", JOptionPane.PLAIN_MESSAGE);
                     }else{
@@ -183,6 +191,7 @@ public class jf1{
                                 } catch (Exception throwables) {
                                     System.out.println(throwables);
                                 }
+                                LOGGER.info("有新用户注册，账号为-->"+un);
                             } } }
             }
         });
@@ -196,7 +205,6 @@ public class jf1{
                     JOptionPane.showMessageDialog(null, "账号或密码不可为空", "提示", JOptionPane.PLAIN_MESSAGE);
                 }else{
                     String sql = "select * from user where username=? and password=?";
-
                     try {
                         ps = conn.prepareStatement(sql);
                         ps.setString(1,un);
@@ -213,6 +221,7 @@ public class jf1{
                         }
                     } catch (SQLException ex) {
                     }
+                    LOGGER.info("用户登录，账号为-->"+un);
                 }
 
             }
@@ -243,6 +252,7 @@ public class jf1{
                             passwordField4.setText("");
                         }
                     } catch (Exception ex) { }
+                    LOGGER.info("管理员:"+un+"进行了登录!!!");
                 }
 
 
@@ -325,48 +335,54 @@ public class jf1{
         button15.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                原
-                String bookname = textField7.getText();
-                String PressName = passwordField14.getText();
-                String price = passwordField9.getText();
-                String status = textField15.getText();
+                SetBook();
 
-//                新
-                String nbookname = textField13.getText();
-                String nPressName = passwordField8.getText();
-                String nprice = textField14.getText();
-                String nstatus = textField16.getText();
-//                update book set bookname='新梦的解析',PressName='新未知出版社',price='19.99',state='0' where bookname='梦的解析'and PressName='未知出版社'and price='32.8' and state='1';
-                String sql = "update book set bookname=?,PressName=?,price=?,state=?where bookname=?and PressName=?and price=? and state=?";
-                try {
-                    ps= conn.prepareStatement(sql);
-                    ps.setString(1,nbookname);
-                    ps.setString(2,nPressName);
-                    ps.setString(3,nprice);
-                    ps.setString(4,nstatus);
-                    ps.setString(5,bookname);
-                    ps.setString(6,PressName);
-                    ps.setString(7,price);
-                    ps.setString(8,status);
-                    int count = ps.executeUpdate();
-                    if (count>0){
-                        JOptionPane.showMessageDialog(null, "修改成功", "提示", JOptionPane.PLAIN_MESSAGE);
-                        jf6.setVisible(false);
-                        textField7.setText("");
-                        passwordField14.setText("");
-                        passwordField9.setText("");
-                        textField15.setText("");
-                        textField13.setText("");
-                        passwordField8.setText("");
-                        textField14.setText("");
-                        textField16.setText("");
-                    }else{
-                        JOptionPane.showMessageDialog(null, "原图书数据可能有误，请重新检查", "提示", JOptionPane.PLAIN_MESSAGE);
-                    }
-                } catch (SQLException throwables) { }
-                RefreshBook();
             }
         });
+//        修改图书2
+        table1.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount()==2){
+                    jf6.setVisible(true);
+                    Point p =e.getPoint();
+                    int r=table1.rowAtPoint(p);
+
+                    String bookname= (String) table1.getValueAt(r,1);
+                    String PressName= (String) table1.getValueAt(r,2);
+                    String price= (String) table1.getValueAt(r,3);
+
+                    textField6.setText(bookname);
+                    passwordField6.setText(PressName);
+                    passwordField7.setText(price);
+
+                    String status= (String) table1.getValueAt(r,4);
+                    textField7.setText(bookname);
+                    passwordField14.setText(PressName);
+                    passwordField9.setText(price);
+                    textField15.setText(status);
+                }
+
+            }
+        });
+
+        table2.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount()==2){
+                    Point p =e.getPoint();
+                    int r=table1.rowAtPoint(p);
+                    String bookname= (String) table1.getValueAt(r,1);
+                    String PressName= (String) table1.getValueAt(r,2);
+                    textField11.setText(bookname);
+                    passwordField12.setText(PressName);
+                    textField12.setText(bookname);
+                    passwordField13.setText(PressName);
+                }
+            }
+        });
+
+
 //          删除图书确认按钮
         button12.addActionListener(new ActionListener() {
             @Override
@@ -386,6 +402,7 @@ public class jf1{
                         int count = ps.executeUpdate();
                         if (count>0){
                             JOptionPane.showMessageDialog(null, "删除成功", "提示", JOptionPane.PLAIN_MESSAGE);
+                            LOGGER.info("管理员进行删除图书操作!!!被删除图书名字为-->"+bookname);
                             jf5.setVisible(false);
                             textField6.setText("");
                             passwordField7.setText("");
@@ -419,6 +436,7 @@ public class jf1{
                         int count = ps.executeUpdate();
                         if (count>0){
                             JOptionPane.showMessageDialog(null, "添加成功", "提示", JOptionPane.PLAIN_MESSAGE);
+                            LOGGER.info("管理员进行添加图书操作!!!图书名字为-->"+bookname);
                             jf3.setVisible(false);
                             textField5.setText("");
                             textField8.setText("");
@@ -428,6 +446,7 @@ public class jf1{
                         }
                     } catch (SQLException throwables) {
                         throwables.printStackTrace();
+
                     }
                 }
                 RefreshBook();
@@ -612,6 +631,7 @@ public class jf1{
                         int count = ps.executeUpdate();
                         if (count>0){
                             JOptionPane.showMessageDialog(null, "借书成功", "提示", JOptionPane.PLAIN_MESSAGE);
+                            LOGGER.info("用户进行了借书操作!!!图书名字为-->"+bookname);
                             jf9.setVisible(false);
                             textField11.setText("");
                             passwordField12.setText("");
@@ -622,6 +642,7 @@ public class jf1{
                         throwables.printStackTrace();
                     }
                 }
+
                 RefreshBook();
             }
         });
@@ -643,6 +664,7 @@ public class jf1{
                         int count = ps.executeUpdate();
                         if (count>0){
                             JOptionPane.showMessageDialog(null, "还书成功", "提示", JOptionPane.PLAIN_MESSAGE);
+                            LOGGER.info("用户进行了还书操作!!!图书名字为-->"+bookname);
                             jf10.setVisible(false);
                             textField12.setText("");
                             passwordField13.setText("");
@@ -653,6 +675,7 @@ public class jf1{
                         throwables.printStackTrace();
                     }
                 }
+
                 RefreshBook();
             }
         });
@@ -682,24 +705,25 @@ public class jf1{
                 jf1.setVisible(true);
                 textField1.setText("");
                 passwordField5.setText("");
+                LOGGER.info("用户已退出登录");
             }
         });
         button28.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(null, "您已退出，请重新登录", "提示", JOptionPane.PLAIN_MESSAGE);
-
                 jf4.setVisible(false);
                 jf2.setVisible(true);
                 textField3.setText("");
                 passwordField4.setText("");
+                LOGGER.info("管理员进行了退出登录");
+
             }
         });
 
     }
     //        刷新图书列表
     public static void RefreshBook(){
-
         String sql = "select * from book";
         try {
             ps=conn.prepareStatement(sql);
@@ -724,6 +748,51 @@ public class jf1{
             table1.setModel(BookInfo);
             table2.setModel(BookInfo);
         }
+    }
+//    修改图书
+    public static void SetBook(){
+        //                原
+        String bookname = textField7.getText();
+        String PressName = passwordField14.getText();
+        String price = passwordField9.getText();
+        String status = textField15.getText();
+
+//                新
+        String nbookname = textField13.getText();
+        String nPressName = passwordField8.getText();
+        String nprice = textField14.getText();
+        String nstatus = textField16.getText();
+//                update book set bookname='新梦的解析',PressName='新未知出版社',price='19.99',state='0' where bookname='梦的解析'and PressName='未知出版社'and price='32.8' and state='1';
+        String sql = "update book set bookname=?,PressName=?,price=?,state=?where bookname=?and PressName=?and price=? and state=?";
+        try {
+            ps= conn.prepareStatement(sql);
+            ps.setString(1,nbookname);
+            ps.setString(2,nPressName);
+            ps.setString(3,nprice);
+            ps.setString(4,(nstatus.equals("未出借")?"1":"0"));
+            ps.setString(5,bookname);
+            ps.setString(6,PressName);
+            ps.setString(7,price);
+            ps.setString(8,(status.equals("未出借")?"1":"0"));
+            int count = ps.executeUpdate();
+            if (count>0){
+                JOptionPane.showMessageDialog(null, "修改成功", "提示", JOptionPane.PLAIN_MESSAGE);
+                LOGGER.info("管理员进行修改图书操作!!!修改后图书名字为-->"+nbookname);
+                jf6.setVisible(false);
+                textField7.setText("");
+                passwordField14.setText("");
+                passwordField9.setText("");
+                textField15.setText("");
+                textField13.setText("");
+                passwordField8.setText("");
+                textField14.setText("");
+                textField16.setText("");
+            }else{
+                JOptionPane.showMessageDialog(null, "原图书数据可能有误，请重新检查", "提示", JOptionPane.PLAIN_MESSAGE);
+            }
+        } catch (SQLException throwables) { }
+
+        RefreshBook();
     }
 
     private static void initComponents() {
