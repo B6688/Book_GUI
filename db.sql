@@ -11,7 +11,7 @@
  Target Server Version : 80029
  File Encoding         : 65001
 
- Date: 25/06/2022 22:10:45
+ Date: 28/06/2022 12:41:10
 */
 
 SET NAMES utf8mb4;
@@ -65,16 +65,18 @@ CREATE TABLE `user` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(20) DEFAULT NULL,
   `password` varchar(20) DEFAULT NULL,
+  `E_mail` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
 BEGIN;
-INSERT INTO `user` (`id`, `username`, `password`) VALUES (1, '888', '999');
-INSERT INTO `user` (`id`, `username`, `password`) VALUES (2, '321123', '123');
-INSERT INTO `user` (`id`, `username`, `password`) VALUES (3, '123', '123');
+INSERT INTO `user` (`id`, `username`, `password`, `E_mail`) VALUES (6, '231777', '123', '23123221@qq.com');
+INSERT INTO `user` (`id`, `username`, `password`, `E_mail`) VALUES (7, '333', '333', '213334@qq.com');
+INSERT INTO `user` (`id`, `username`, `password`, `E_mail`) VALUES (8, '111', '111', '111111@qq.com');
+INSERT INTO `user` (`id`, `username`, `password`, `E_mail`) VALUES (9, '333', '333', '333333@qq.com');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
